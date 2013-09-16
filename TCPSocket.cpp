@@ -1,4 +1,6 @@
 #include "TCPSocket.h"
+#include <unistd.h>
+
 
 TCPSocket::TCPSocket(int sockfd, struct sockaddr_in* address)
 : m_sockfd(sockfd)

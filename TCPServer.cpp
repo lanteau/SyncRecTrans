@@ -1,5 +1,7 @@
 #include <string>
 #include "TCPServer.h"
+#include <stdio.h>
+
 
 TCPServer::TCPServer(int port, const char* address) :
 	m_listenSD(0),
@@ -68,12 +70,12 @@ TCPSocket* TCPServer::Accept()
 	socklen_t len = sizeof(address);
 	memset(&address, 0, sizeof(address));
 
-	int sockD = accept(m_listenSD, (struct sockaddr*)&address, &));
+	int sockD = accept(m_listenSD, (struct sockaddr*)&address, &len);
 	if(sockD < 0)
 	{
 		perror("Accept failed!");
 		return NULL;
 	}
 
-	return new TCPStream(sockD, &address);
+	return new TCPSocket(sockD, &address);
 }

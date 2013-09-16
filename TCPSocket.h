@@ -4,8 +4,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-//#include <arpa/inet.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 #include <string>
+#include <string.h>
 
 class TCPSocket 
 {
@@ -15,10 +17,10 @@ class TCPSocket
 	sockaddr_in serv_addr, cli_addr;
 
 public:
-	friend class SyncTransmitter;
-	friend class SyncReceiver;
+	friend class TCPServer;
+	friend class TCPClient;
 
-	~TCPStream();
+	~TCPSocket();
 
 	ssize_t Send(char* buffer, size_t len);
 	ssize_t Receive(char* buffer, size_t len);

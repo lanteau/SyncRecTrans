@@ -65,7 +65,7 @@ int Message::GetNumBlocks()
 	return m_blocks.size();
 }
 
-std::vector<std::string> GetBlocks()
+std::vector<std::string> Message::GetBlocks()
 {
 	return m_blocks;
 }
@@ -92,10 +92,10 @@ void Message::Frame()
 	//Populate frames
 	for(int j = 0; j < numFrames; j++)
 	{
-		std::string newBlock = new std::string();
+		std::string* newBlock = new std::string();
 		//Add first 2 SYN characters (ASCII 22)
-		newBlock[0] = 22;
-		newBlock[1] = 22;
+		newBlock->insert(0,2,22);
+		//newBlock->insert(22);
 
 		//Calculate length of frame
 		int frameLen = 64;
@@ -103,7 +103,7 @@ void Message::Frame()
 			frameLen = m_data.length() - pos;
 
 		//Control character indicating length of frame
-		newBlock[2] = frameLen;
+		newBlock->insert(2, 1, frameLen);
 
 		//Maximum of 64 data characters
 		for(int i = 0; i < frameLen; i++)
@@ -114,12 +114,12 @@ void Message::Frame()
 			if(CalculateOddParity(newChar))
 				newChar |= 1 << 7; //Set odd parity bit
 
-			newBlock[i+3] = reverse_byte(newChar);
+			newBlock->insert(i+3, 1, reverse_byte(newChar));
 			
 		}
 
 		//Add frame to vector
-		m_blocks.push_back(newBlock);
+		m_blocks.push_back(*newBlock);
 	}
 }
 

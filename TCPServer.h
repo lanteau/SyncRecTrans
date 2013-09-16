@@ -3,11 +3,13 @@
 
 #include <string>
 #include <netinet/in.h>
+#include "TCPSocket.h"
+#include <string.h>
 
 class TCPServer
 {
 	int m_listenSD;
-	string m_address;
+	std::string m_address;
 	int m_portNum;
 	bool m_listening;
 

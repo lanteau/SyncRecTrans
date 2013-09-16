@@ -2,10 +2,11 @@
 #define MESSAGE_H
 
 #include <string>
+#include <vector>
 
 class Message
 {
-	std::string m_rawMessage // contains actual message plus extra control characters, etc
+	std::string m_rawMessage; // contains actual message plus extra control characters, etc
 	std::string m_data;
 
 	std::vector<std::string> m_blocks;
@@ -23,8 +24,8 @@ public:
 
 private:
 	void Frame();
-	void DeFrame()
-	bool CalculateOddParity(unsigned char byte)
+	void DeFrame();
+	bool CalculateOddParity(unsigned char byte);
 
 };
 
