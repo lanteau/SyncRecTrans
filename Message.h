@@ -12,19 +12,25 @@ class Message
 	std::vector<std::string> m_blocks;
 	int m_dataLen; // length of data in message
 
+	bool m_valid;
+
 public:
 	Message(std::string data);
-	Message(char* buffer, int len);
+	Message(unsigned char* buffer, int len);
 
 	int GetLength();
 	int GetNumBlocks();
 	std::vector<std::string> GetBlocks();
 	// Returns true if byte is verified by odd parity check
-	bool VerifyByte(unsigned char byte);
+	bool isValid();
+	std::string GetDataString();
+
 
 private:
 	void Frame();
 	void DeFrame();
+	void Verify();
+
 	bool CalculateOddParity(unsigned char byte);
 
 };

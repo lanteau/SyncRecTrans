@@ -7,7 +7,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string>
-#include <string.h>
 
 class TCPSocket 
 {
@@ -27,6 +26,8 @@ public:
 
 	std::string GetPeerIP();
 	int GetPeerPort();
+
+	void Close();
 
 
 private:

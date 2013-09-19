@@ -1,5 +1,6 @@
 #include "Message.h"
 #include <bitset>
+#include <iostream>
 
 unsigned char reverse_byte(unsigned char x)
 {
@@ -48,10 +49,13 @@ Message::Message(std::string data) // This takes string calculates parity, adds 
 	Frame();
 }
 
-Message::Message(char* buffer, int len) // Take the raw data from the stream, remove characters, extract real data
+Message::Message(unsigned char* buffer, int len) // Take the raw data from the stream, remove characters, extract real data
 {
-	m_rawMessage = buffer;
-	DeFrame();
+	m_rawMessage = reinterpret_cast<const char*>(buffer);
+	Verify();
+
+	if(m_valid)
+		DeFrame();
 
 }
 
@@ -70,15 +74,27 @@ std::vector<std::string> Message::GetBlocks()
 	return m_blocks;
 }
 
-bool Message::VerifyByte(unsigned char byte)
+void Message::Verify()
 {
-	unsigned char tempByte = reverse_byte(byte);
+	bool valid = true;
 
-	bool receivedParity = tempByte & 0x80; // AND with 10000000 gives only parity bit
-	tempByte = tempByte & 0x7F; // clear parity bit
+	for(int i = 3; i < sizeof(m_rawMessage); i++)
+	{
+		unsigned char currentChar = m_rawMessage[i];
+		bool receivedParity = currentChar & 0x1;
 
-	return (receivedParity == CalculateOddParity(tempByte));
+		currentChar &= 0x1; // Clear parity bit
+		bool calculatedParity = CalculateOddParity(currentChar);
 
+		valid &= (receivedParity == calculatedParity);
+
+	}
+		m_valid = valid;
+}
+
+bool Message::isValid()
+{
+	return m_valid;
 }
 
 void Message::Frame()
@@ -125,6 +141,19 @@ void Message::Frame()
 
 void Message::DeFrame()
 {
+	//To get to this point, we know the message (block) is valid
+	char message[64];
+
+	for(int i = 3; i < m_rawMessage.length(); i++)
+	{
+		unsigned char newChar = m_rawMessage.at(i);
+		newChar = reverse_byte(newChar);
+		newChar &= 0x7F; //Clear parity bit
+
+		//We now have our real character
+		message[i-3] = (char) newChar;
+		m_data = message;
+	}
 
 }
 
@@ -135,11 +164,12 @@ bool Message::CalculateOddParity(unsigned char byte)
 	//Calculate parity
 	bool odd = false;
 	for(int j = 0; j < 8; j++)
-	{
-		if(bitString[j])
-			odd = !odd;
-
-	}
+		if(bitString[j]) odd = !odd;
 
 	return odd;
+}
+
+std::string Message::GetDataString()
+{
+	return m_data;
 }

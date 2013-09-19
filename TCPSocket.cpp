@@ -1,5 +1,4 @@
 #include "TCPSocket.h"
-#include <unistd.h>
 
 
 TCPSocket::TCPSocket(int sockfd, struct sockaddr_in* address)
@@ -17,6 +16,11 @@ TCPSocket::~TCPSocket()
   close(m_sockfd);
 }
 
+void TCPSocket::Close()
+{
+  close(m_sockfd);
+}
+
 ssize_t TCPSocket::Send(char* buffer, size_t len)
 {
   return write(m_sockfd, buffer, len);
@@ -24,7 +28,7 @@ ssize_t TCPSocket::Send(char* buffer, size_t len)
 
 ssize_t TCPSocket::Receive(char* buffer, size_t len)
 {
-  return read(m_sockfd, buffer, len);
+  return recv(m_sockfd, buffer, len, 0);
 }
 
 std::string TCPSocket::GetPeerIP()

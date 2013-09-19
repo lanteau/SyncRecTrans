@@ -5,6 +5,7 @@
 #include <vector>
 #include <stdio.h>
 #include <cstdlib>
+#include <iostream>
 
 int main(int argc, char** argv)
 {
@@ -34,8 +35,9 @@ int main(int argc, char** argv)
 			socket = server->Accept();
 			if(socket != NULL)
 			{
-		
-				for(int i = 0; i < blocks.size(); i++)
+				int i = 0;
+				int resends = 0;		
+				while(i < blocks.size() && resends < 100)
 				{
 					std::string block = blocks.at(i);
 					for(int j = 0; j < block.length(); j++)
@@ -44,11 +46,29 @@ int main(int argc, char** argv)
 						printf("%d \n", test);
 					}
 					char* buffer = new char[block.length() + 1];
+					char receiveBuffer[256];
 					strcpy(buffer, block.c_str());
 					//buffer = block.c_str();
-					socket->Send(buffer, block.size());
+					printf("%d", socket->Send(buffer, block.size()));
+					
+					printf("%s", "Waiting for ACK\n");
+					int len = socket->Receive(receiveBuffer, sizeof(receiveBuffer));
+					receiveBuffer[len] = NULL; //Null terminate string
+					if(receiveBuffer[0] == 6) //ACK character
+					{
+						i++;
+						receiveBuffer[0] = NULL;
+					}
+					else			// Need to resend block
+						resends++;
 
+					//if(resends > 100)
+					//	exit(-2);
 				}
+				char endOfTrans = 4;
+				socket->Send(&endOfTrans, sizeof(endOfTrans));
+				printf("%s%d%s", "Number of resends: ", resends, "\n");
+				socket->Close(); //Close connection to client
 
 
 			}

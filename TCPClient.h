@@ -7,7 +7,7 @@ class TCPClient
 {
 
 public:
-	TCPSocket* Connect(int port, const char* host);
+	TCPSocket* Connect(const char* hostname, int port);
 
 private:
 	//Resolve hostname to an ip address

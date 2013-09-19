@@ -77,5 +77,11 @@ TCPSocket* TCPServer::Accept()
 		return NULL;
 	}
 
+	//Set timeout parameters
+	struct timeval tv;
+	tv.tv_sec = 0; // 100ms timeout
+	tv.tv_usec = 1e05;
+	setsockopt(sockD, SOL_SOCKET, SO_RCVTIMEO, (struct timeval*)&tv, sizeof(struct timeval));
+
 	return new TCPSocket(sockD, &address);
 }
