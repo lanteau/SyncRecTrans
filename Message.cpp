@@ -1,6 +1,8 @@
 #include "Message.h"
 #include <bitset>
 #include <iostream>
+#include <cstdio>
+#include <string.h>
 
 unsigned char reverse_byte(unsigned char x)
 {
@@ -44,6 +46,7 @@ unsigned char reverse_byte(unsigned char x)
 Message::Message(std::string data) // This takes string calculates parity, adds control characters, etc
 {
 	m_dataLen = data.length();
+	m_fLen = m_dataLen + 3; // 3 control characters
 	m_data = data;
 
 	Frame();
@@ -52,6 +55,7 @@ Message::Message(std::string data) // This takes string calculates parity, adds 
 Message::Message(unsigned char* buffer, int len) // Take the raw data from the stream, remove characters, extract real data
 {
 	m_rawMessage = reinterpret_cast<const char*>(buffer);
+	m_fLen = m_rawMessage.length();
 	Verify();
 
 	if(m_valid)
@@ -59,19 +63,14 @@ Message::Message(unsigned char* buffer, int len) // Take the raw data from the s
 
 }
 
-int Message::GetLength()
+int Message::GetDataLength()
 {
 	return m_dataLen;
 }
 
-int Message::GetNumBlocks()
+int Message::GetFrameLength()
 {
-	return m_blocks.size();
-}
-
-std::vector<std::string> Message::GetBlocks()
-{
-	return m_blocks;
+	return m_fLen;
 }
 
 void Message::Verify()
@@ -98,44 +97,24 @@ bool Message::isValid()
 }
 
 void Message::Frame()
-{
-	//Calc number of frames
-	int numFrames = m_data.length() / 64;
-	if(m_data.length() % 64 > 0)
-		numFrames++;
+{	
+	//Insert SYN characters
+	m_rawMessage.insert(0,2,22);
 
-	int pos = 0;
-	//Populate frames
-	for(int j = 0; j < numFrames; j++)
-	{
-		std::string* newBlock = new std::string();
-		//Add first 2 SYN characters (ASCII 22)
-		newBlock->insert(0,2,22);
-		//newBlock->insert(22);
-
-		//Calculate length of frame
-		int frameLen = 64;
-		if(pos+64 > m_data.length())
-			frameLen = m_data.length() - pos;
-
-		//Control character indicating length of frame
-		newBlock->insert(2, 1, frameLen);
-
-		//Maximum of 64 data characters
-		for(int i = 0; i < frameLen; i++)
-		{
-			unsigned char newChar = m_data.at(pos);
 	
-			pos++;
-			if(CalculateOddParity(newChar))
-				newChar |= 1 << 7; //Set odd parity bit
+	//Insert message length control character
+	m_rawMessage.insert(2,1,(char)m_data.length());
 
-			newBlock->insert(i+3, 1, reverse_byte(newChar));
-			
-		}
 
-		//Add frame to vector
-		m_blocks.push_back(*newBlock);
+	//Maximum of 64 data characters
+	for(int i = 0; i < m_data.length(); i++)
+	{
+		unsigned char newChar = m_data.at(i);
+
+		if(CalculateOddParity(newChar))
+			newChar |= 1 << 7; //Set odd parity bit
+
+		m_rawMessage.insert(i+3, 1, reverse_byte(newChar));
 	}
 }
 
@@ -143,6 +122,7 @@ void Message::DeFrame()
 {
 	//To get to this point, we know the message (block) is valid
 	char message[64];
+	char* subString = new char[2];
 
 	for(int i = 3; i < m_rawMessage.length(); i++)
 	{
@@ -151,8 +131,10 @@ void Message::DeFrame()
 		newChar &= 0x7F; //Clear parity bit
 
 		//We now have our real character
-		message[i-3] = (char) newChar;
-		m_data = message;
+		subString[0] = (char) newChar;
+		subString[1] = NULL;
+		m_data.append(subString);
+		//delete subString;
 	}
 
 }
@@ -172,4 +154,9 @@ bool Message::CalculateOddParity(unsigned char byte)
 std::string Message::GetDataString()
 {
 	return m_data;
+}
+
+std::string Message::GetRawString()
+{
+	return m_rawMessage;
 }

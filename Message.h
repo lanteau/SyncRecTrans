@@ -9,8 +9,8 @@ class Message
 	std::string m_rawMessage; // contains actual message plus extra control characters, etc
 	std::string m_data;
 
-	std::vector<std::string> m_blocks;
 	int m_dataLen; // length of data in message
+	int m_fLen; // length of data + control characters 
 
 	bool m_valid;
 
@@ -18,12 +18,12 @@ public:
 	Message(std::string data);
 	Message(unsigned char* buffer, int len);
 
-	int GetLength();
-	int GetNumBlocks();
-	std::vector<std::string> GetBlocks();
+	int GetDataLength();
+	int GetFrameLength();
 	// Returns true if byte is verified by odd parity check
 	bool isValid();
 	std::string GetDataString();
+	std::string GetRawString();
 
 
 private:

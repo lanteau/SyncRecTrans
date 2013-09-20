@@ -1,6 +1,7 @@
 #include "TCPSocket.h"
 #include "TCPServer.h"
 #include "Message.h"
+#include "FileReader.h"
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -11,67 +12,78 @@ int main(int argc, char** argv)
 {
 	if(argc < 2 || argc > 4)
 	{
-		printf("Usage: SyncServer <port> [<ip>]\n");
+		printf("Usage: SyncServer <filename.txt> <port> [<ip>]\n");
 		exit(1);
 	}
 
 	TCPSocket* socket = NULL;
 	TCPServer* server = NULL;
 
-	Message myMessage("Testing123");
-	std::vector<std::string> blocks = myMessage.GetBlocks();
+	FileReader myFile(argv[1]);
+	std::vector<Message> messages = myFile.GetMessages();
 
-	if(argc == 3)
-		server = new TCPServer(atoi(argv[1]), argv[2]);
+	if(argc == 4)
+		server = new TCPServer(atoi(argv[2]), argv[3]);
 	else
-		server = new TCPServer(atoi(argv[1]));
+		server = new TCPServer(atoi(argv[2]));
 
-	printf("About to start!\n");
 	if(server->Start() == 0)
 	{
 		while(1)
 		{
-			printf("Accepting connections on port %s \n", argv[1]);
+			printf("Accepting connections on port %s \n", argv[2]);
 			socket = server->Accept();
 			if(socket != NULL)
 			{
-				int i = 0;
-				int resends = 0;		
-				while(i < blocks.size() && resends < 100)
-				{
-					std::string block = blocks.at(i);
-					for(int j = 0; j < block.length(); j++)
-					{
-						unsigned char test = block.at(j);
-						printf("%d \n", test);
-					}
-					char* buffer = new char[block.length() + 1];
-					char receiveBuffer[256];
-					strcpy(buffer, block.c_str());
-					//buffer = block.c_str();
-					printf("%d", socket->Send(buffer, block.size()));
-					
-					printf("%s", "Waiting for ACK\n");
-					int len = socket->Receive(receiveBuffer, sizeof(receiveBuffer));
-					receiveBuffer[len] = NULL; //Null terminate string
-					if(receiveBuffer[0] == 6) //ACK character
-					{
-						i++;
-						receiveBuffer[0] = NULL;
-					}
-					else			// Need to resend block
-						resends++;
+				int pid = fork();
+  				if(pid < 0)
+  				{
+  					perror("ERROR on fork\n");
+  					exit(1);
+  				}
+  				if(pid == 0)
+  				{
+  					delete server;
 
-					//if(resends > 100)
-					//	exit(-2);
+					int i = 0;
+					int resends = 0;		
+					while(i < messages.size() && resends < 100)
+					{
+						Message currMsg = messages.at(i);
+
+						char buffer[256];
+						char receiveBuffer[256];
+						memset(&buffer, 0, sizeof(buffer)); // Clear buffer
+
+						for(int j = 0; j < currMsg.GetFrameLength(); j++)
+							buffer[j] = currMsg.GetRawString()[j];
+
+						socket->Send(buffer, sizeof(buffer));
+
+						int len = socket->Receive(receiveBuffer, sizeof(receiveBuffer));
+						if(receiveBuffer[0] == 6) //ACK character
+						{
+							i++;
+							receiveBuffer[0] = NULL;
+						}
+						else // Need to resend block
+							resends++;
+					}
+				
+					char endOfTrans = 4;
+					socket->Send(&endOfTrans, sizeof(endOfTrans));
+					printf("%s%d%s", "Number of resends: ", resends, "\n");
+					socket->Close(); //Close connection to client
+					exit(0);
 				}
-				char endOfTrans = 4;
-				socket->Send(&endOfTrans, sizeof(endOfTrans));
-				printf("%s%d%s", "Number of resends: ", resends, "\n");
-				socket->Close(); //Close connection to client
+				else
+				{
+					socket->Close();
+				}
 
 
 			}
+			perror("Error on Accept!");
 		}
 	}
 	perror("Could not start Transmit server");
