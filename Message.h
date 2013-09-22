@@ -2,7 +2,6 @@
 #define MESSAGE_H
 
 #include <string>
-#include <vector>
 
 class Message
 {

@@ -2,7 +2,7 @@
 #include "TCPClient.h"
 #include <string.h>
 #include <netdb.h>
-#include <stdio.h>
+#include <cstdio>
 
 TCPSocket* TCPClient::Connect(const char* hostname, int port)
 {

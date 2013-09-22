@@ -10,7 +10,6 @@ FileReader::FileReader()
 FileReader::FileReader(std::string fileName) :
 	m_fileName(fileName)
 {
-	Parse();
 }
 
 void FileReader::Parse()

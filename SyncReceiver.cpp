@@ -3,20 +3,20 @@
 #include "Message.h"
 #include <string>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 #include <iostream>
-#include <string.h>
+#include <cstring>
 
 int main(int argc, char** argv)
 {
 	if(argc != 3)
 	{
-		printf("usage: %s <ip> <port>\n", argv[0]);
-		exit(1);
+		std::cout << "Usage: " << argv[0] << " <ip> <port>" << std::endl;
+		return(1);
 	}
 
-	int length;
+	int receivedLen;
 	std::string receivedData;
 	unsigned char buffer[256];
 	memset(&buffer, 0, sizeof(buffer));
@@ -25,17 +25,17 @@ int main(int argc, char** argv)
 	TCPSocket* socket = client->Connect(argv[1], atoi(argv[2]));
 
 	bool received = false;
-	char ack = 6;
+	char ack = 6; //ACK character is ASCII 6
 	int numPackets = 0;
 
 	if(socket)
 	{
 		while(!received)
 		{
-			length = socket->Receive(reinterpret_cast<char*>(buffer), sizeof(buffer));
-			if(length > 0)
+			receivedLen = socket->Receive(reinterpret_cast<char*>(buffer), sizeof(buffer));
+			if(receivedLen > 0)
 			{
-				if(length > 2) //This is a block
+				if(receivedLen > 2) //This is a block
 				{
 
 					std::string* block = new std::string(reinterpret_cast<const char*>(buffer));
@@ -58,13 +58,14 @@ int main(int argc, char** argv)
 			}
 		}
 
-		printf("%s%s%s", "\nReceived message was: ", receivedData.c_str(), "\n");
-		printf("%s%d%s", "\nNumber of packets received: ", numPackets, "\n");
+		std::cout << "Received message was:" << std::endl << std::endl << receivedData << std::endl << std::endl;
+		std::cout << "Number of packets received: " << numPackets << std::endl;
 
-		
 		delete socket;
-		exit(0);
+		delete client;
+		return(0);
 	}
-
-	exit(1);
+	delete socket;
+	delete client;
+	return(1);
 }

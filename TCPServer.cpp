@@ -1,7 +1,10 @@
-#include <string>
+#include "TCPSocket.h"
 #include "TCPServer.h"
-#include <stdio.h>
-
+#include <string>
+#include <cstring>
+#include <iostream>
+#include <unistd.h>
+#include <cerrno>
 
 TCPServer::TCPServer(int port, const char* address) :
 	m_listenSD(0),
@@ -45,14 +48,14 @@ int TCPServer::Start()
 	int result = bind(m_listenSD, (struct sockaddr*)&address, sizeof(address));
 	if(result != 0)
 	{
-		perror("Failed to bind to socket!");
+		std::cerr << "Failed to bind to socket: " << strerror(errno) << std::endl;
 		return result;
 	}
 
 	result = listen(m_listenSD, 5);
 	if(result != 0)
 	{
-		perror("Listening failed!");
+		std::cerr << "Listening failed: " << strerror(errno) << std::endl;
 		return result;
 	}
 
@@ -73,7 +76,7 @@ TCPSocket* TCPServer::Accept()
 	int sockD = accept(m_listenSD, (struct sockaddr*)&address, &len);
 	if(sockD < 0)
 	{
-		perror("Accept failed!");
+		std::cerr << "Accept failed: " << strerror(errno) << std::endl;
 		return NULL;
 	}
 

@@ -1,8 +1,5 @@
 #include "Message.h"
 #include <bitset>
-#include <iostream>
-#include <cstdio>
-#include <string.h>
 
 unsigned char reverse_byte(unsigned char x)
 {
@@ -132,7 +129,7 @@ void Message::DeFrame()
 
 		//We now have our real character
 		subString[0] = (char) newChar;
-		subString[1] = NULL;
+		subString[1] = 0;
 		m_data.append(subString);
 		//delete subString;
 	}

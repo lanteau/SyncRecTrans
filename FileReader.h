@@ -1,8 +1,8 @@
 #ifndef FILEREADER_H
 #define FILEREADER_H
 
-#include <string>
 #include "Message.h"
+#include <string>
 #include <vector>
 
 class FileReader
@@ -23,6 +23,7 @@ public:
 
 	//Changes FileReader to look at a new file
 	void ChangeFile(std::string fileName);
+	//Reads the input file into m_fileData
 	void Parse();
 };
 

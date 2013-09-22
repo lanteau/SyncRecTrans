@@ -2,9 +2,6 @@
 #define TCPSERVER_H
 
 #include <string>
-#include <netinet/in.h>
-#include "TCPSocket.h"
-#include <string.h>
 
 class TCPServer
 {
