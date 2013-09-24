@@ -1,3 +1,13 @@
+/* Message class
+*
+*	A Message object represents a single "block" of data in our protocol. Each Message
+* starts with 2 ASCII SYN characters, then a byte representing length of the data to
+* follow (1-64 bytes). Finally, the data itself that is between 1 and 64 bytes in
+* length
+*
+* Author: Logan Anteau
+*/
+
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
@@ -34,6 +44,4 @@ private:
 
 };
 
-
 #endif /* MESSAGE_H */
-

@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 {
 	if(argc < 3 || argc > 4)
 	{
-		std::cout << "Usage: SyncServer <filename.txt> <port> [<ip>]" << std::endl;
+		std::cout << "Usage: " << argv[0] << " <filename.txt> <port> [<ip>]" << std::endl;
 		return 1;
 	}
 
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
 	if(server->Start() == 0)
 	{
-		std::cout << "Listening for connections on port " << argv[2] << "..." << std::endl;
+		std::cout << "Listening connections on port " << argv[2] << "..." << std::endl;
 
 		while(1)
 		{
@@ -56,21 +56,19 @@ int main(int argc, char** argv)
 			if(socket != NULL)
 			{
 				int pid = fork();
-  				if(pid < 0)
-  				{
-  					std::cerr << "Error on fork: " << strerror(errno) << std::endl;
-  					return(1);
-  				}
-  				if(pid == 0)
-  				{
-  					delete server;
-
+  			if(pid < 0)
+  			{
+  				std::cerr << "Error on fork: " << strerror(errno) << std::endl;
+  				return(1);
+  			}
+  			if(pid == 0)
+  			{
+  				delete server;
 					int i = 0;
 					int resends = 0;		
 					while(i < messages.size() && resends < 100)
 					{
 						Message currMsg = messages.at(i);
-
 						char buffer[256];
 						char receiveBuffer[256];
 						memset(&buffer, 0, sizeof(buffer)); // Clear buffer
@@ -89,7 +87,7 @@ int main(int argc, char** argv)
 						else // Need to resend block
 							resends++;
 					}
-				
+			
 					char endOfTrans = 4;
 					socket->Send(&endOfTrans, sizeof(endOfTrans));
 					std::cout << "Number of resent blocks: " << resends << std::endl;
@@ -100,8 +98,6 @@ int main(int argc, char** argv)
 				{
 					socket->Close();
 				}
-
-
 			}
 		}
 	}

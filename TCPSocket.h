@@ -1,3 +1,13 @@
+/* TCPSocket class
+*
+*	A TCPSocket is the bread and butter of sending data back and forth over a 
+* network socket. The TCPSocket object contains a file descriptor to the
+* actual socket and it's peer port and IP. The TCPSocket Send() and Receive()
+* methods are used to transmit data.
+*
+* Author: Logan Anteau
+*/
+
 #ifndef TCPSOCKET_H
 #define TCPSOCKET_H
 

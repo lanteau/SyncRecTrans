@@ -3,13 +3,15 @@
 #include <string>
 #include <cerrno>
 
-FileReader::FileReader()
-{
-}
-
 FileReader::FileReader(std::string fileName) :
 	m_fileName(fileName)
 {
+}
+
+void FileReader::ChangeFile(std::string fileName)
+{
+	m_fileName = fileName;
+	m_fileData.empty();
 }
 
 void FileReader::Parse()
@@ -59,10 +61,4 @@ FileReader::MessageVec FileReader::GetMessages()
 	}
 
 	return messages;
-}
-
-void FileReader::ChangeFile(std::string fileName)
-{
-	m_fileName = fileName;
-	m_fileData.empty();
 }

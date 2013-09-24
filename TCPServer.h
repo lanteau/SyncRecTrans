@@ -15,12 +15,13 @@ public:
 	~TCPServer();
 
 	int Start();
-	TCPSocket* Accept();
 
+	//Blocking. Returns pointer to TCPSocket of connected client
+	TCPSocket* Accept(); 
+	
 private:
 	TCPServer() {}
 
 };
-
 
 #endif /* TCPSERVER_H */

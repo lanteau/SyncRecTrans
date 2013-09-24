@@ -1,3 +1,12 @@
+/* TCPClient class
+*
+*	TCPClient is as the name suggests a class representing a TCPClient. The
+* TCPClient only has Connect() and ResolveHost() methods. The Connect() method
+* returns a pointer to a TCPSocket that can then be used to transmit data
+*
+* Author: Logan Anteau
+*/
+
 #ifndef TCPCLIENT_H
 #define TCPCLIENT_H
 
